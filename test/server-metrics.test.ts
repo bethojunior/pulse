@@ -33,6 +33,11 @@ describe('server metrics', () => {
         expect(value).toBeGreaterThanOrEqual(0);
       }
       expect(sample.process.eventLoop.utilization).toBeLessThanOrEqual(100);
+      const { resources } = sample.process;
+      const listed = Object.values(resources.byType).reduce((sum, count) => sum + count, 0);
+      expect(resources.handles + resources.requests).toBeLessThanOrEqual(listed);
+      expect(resources.handles).toBeGreaterThanOrEqual(0);
+      expect(resources.requests).toBeGreaterThanOrEqual(0);
     } finally {
       collector.stop();
     }

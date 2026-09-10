@@ -427,15 +427,27 @@ function eventLoopUtilization(previous?: ReturnType<typeof performance.eventLoop
   return previous ? performance.eventLoopUtilization(previous) : performance.eventLoopUtilization();
 }
 
+// Request wraps as named by Node (TCPConnectWrap, WriteWrap, FSReqCallback, GetAddrInfoReqWrap, ...).
+const REQUEST_RESOURCE = /(Req(Wrap|Callback|Promise)?|ConnectWrap|WriteWrap|ShutdownWrap|QueryWrap|SendWrap)$/;
+// Timers and immediates are scheduled callbacks, neither libuv handles nor requests.
+const SCHEDULED_RESOURCE = new Set(['Timeout', 'Immediate']);
+
+// Only the public process.getActiveResourcesInfo() is used here. The internal
+// process._getActiveHandles() / _getActiveRequests() abort the whole process with
+// "Assertion failed: !obj.IsEmpty()" (node::AsyncWrap::GetOwner) when a handle is
+// being torn down while it runs, which is not something a try/catch can recover from.
 function activeResources(): { handles: number; requests: number; byType: Record<string, number> } {
   const byType: Record<string, number> = {};
+  let handles = 0;
+  let requests = 0;
   const getInfo = (process as { getActiveResourcesInfo?: () => string[] }).getActiveResourcesInfo;
-  if (typeof getInfo === 'function') {
-    for (const type of getInfo.call(process)) byType[type] = (byType[type] ?? 0) + 1;
+  const types = typeof getInfo === 'function' ? safe(() => getInfo.call(process), [] as string[]) : [];
+  for (const type of types) {
+    byType[type] = (byType[type] ?? 0) + 1;
+    if (SCHEDULED_RESOURCE.has(type)) continue;
+    if (REQUEST_RESOURCE.test(type)) requests += 1;
+    else handles += 1;
   }
-  const internals = process as unknown as { _getActiveHandles?: () => unknown[]; _getActiveRequests?: () => unknown[] };
-  const handles = safe(() => internals._getActiveHandles?.().length ?? 0, 0);
-  const requests = safe(() => internals._getActiveRequests?.().length ?? 0, 0);
   return { handles, requests, byType };
 }
 
