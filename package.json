@@ -1,0 +1,81 @@
+{
+  "name": "@madgic/pulse",
+  "version": "0.1.0",
+  "description": "A NestJS observability module with traces, spans, errors, logs, and custom metrics.",
+  "author": "Betho Junior",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bethojunior/pulse.git"
+  },
+  "homepage": "https://github.com/bethojunior/pulse#readme",
+  "bugs": {
+    "url": "https://github.com/bethojunior/pulse/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "pulse": "./dist/cli.js"
+  },
+  "files": [
+    "scripts/init-config.mjs",
+    "dist",
+    "README.md",
+    "LICENSE",
+    "pulse.config.example.json"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/init-config.mjs --auto",
+    "prebuild": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "keywords": [
+    "nestjs",
+    "observability",
+    "tracing",
+    "metrics",
+    "apm",
+    "logging"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@nestjs/common": ">=10 <13",
+    "@nestjs/core": ">=10 <13",
+    "rxjs": ">=7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "@types/node": "^24.3.0",
+    "eslint": "^9.34.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@types/pg": "^8.23.1",
+    "bullmq": "^6.3.4",
+    "ioredis": "^6.0.0",
+    "nanoid": "^5.1.5",
+    "pg": "^8.23.0"
+  }
+}

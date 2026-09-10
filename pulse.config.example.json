@@ -1,0 +1,25 @@
+{
+  "serviceId": "api",
+  "environment": "Production",
+  "redis": { "enabled": false, "url": "${REDIS_URL}" },
+  "rabbitmq": { "enabled": false, "url": "${RABBITMQ_URL}", "queues": [] },
+  "database": { "enabled": false, "driver": "postgres", "url": "${DATABASE_URL}" },
+  "queues": { "enabled": false, "driver": "bullmq", "url": "${REDIS_URL}", "prefix": "bull", "names": [] },
+  "dashboard": {
+    "enabled": true,
+    "path": "/pulse",
+    "users": [
+      {
+        "username": "admin",
+        "password": "${PULSE_PASSWORD}",
+        "name": "Admin",
+        "role": "owner"
+      }
+    ]
+  },
+  "flushIntervalMs": 10000,
+  "retentionLimit": 5000,
+  "exporter": {
+    "console": false
+  }
+}

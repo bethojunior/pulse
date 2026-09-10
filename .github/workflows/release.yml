@@ -1,0 +1,88 @@
+name: Release
+
+# Publishes @madgic/pulse to npm whenever the version in package.json on main
+# is not on the registry yet. Can also be started by hand, optionally bumping
+# the version first.
+#
+# Auth: prefers npm trusted publishing (OIDC, no secret needed; configure the
+# GitHub Actions publisher for this repo + release.yml on npmjs.com). If an
+# NPM_TOKEN repository secret exists, it is used instead, with provenance.
+
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump to apply before publishing ("none" publishes the version already in package.json)
+        type: choice
+        options: [none, patch, minor, major]
+        default: none
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bump version
+        if: github.event_name == 'workflow_dispatch' && inputs.bump != 'none'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          npm version "${{ inputs.bump }}" -m "chore(release): v%s"
+          git push --follow-tags origin HEAD:main
+
+      - name: Compare with the registry
+        id: registry
+        run: |
+          NAME="$(node -p "require('./package.json').name")"
+          VERSION="$(node -p "require('./package.json').version")"
+          PUBLISHED="$(npm view "$NAME@$VERSION" version 2>/dev/null || true)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if [ -n "$PUBLISHED" ]; then
+            echo "$NAME@$VERSION is already on the registry; nothing to publish."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$NAME@$VERSION is not on the registry yet; publishing."
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.registry.outputs.publish == 'true'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+            npm publish --access public --provenance
+          else
+            npm publish --access public
+          fi
+
+      - name: Tag the release
+        if: steps.registry.outputs.publish == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.bump != 'none')
+        run: |
+          TAG="v${{ steps.registry.outputs.version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "$TAG already exists"
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
