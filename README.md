@@ -1,5 +1,9 @@
 # @madgic/pulse
 
+[![npm version](https://img.shields.io/npm/v/@madgic/pulse)](https://www.npmjs.com/package/@madgic/pulse)
+[![CI](https://github.com/bethojunior/pulse/actions/workflows/ci.yml/badge.svg)](https://github.com/bethojunior/pulse/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A small NestJS observability package inspired by the ergonomics of NestJS Observe.
 
 It gives Nest applications request traces, nested spans, handled error capture, request-scoped
