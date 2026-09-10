@@ -1,6 +1,6 @@
 {
   "name": "@madgic/pulse",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A NestJS observability module with traces, spans, errors, logs, and custom metrics.",
   "author": "Betho Junior",
   "repository": {
