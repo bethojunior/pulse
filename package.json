@@ -60,22 +60,22 @@
     "rxjs": ">=7"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
-    "@nestjs/common": "^11.1.6",
-    "@nestjs/core": "^11.1.6",
-    "@types/node": "^24.3.0",
-    "eslint": "^9.34.0",
+    "@eslint/js": "^10.0.1",
+    "@nestjs/common": "^12.1.2",
+    "@nestjs/core": "^12.1.2",
+    "@types/node": "^26.6.4",
+    "eslint": "^10.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "typescript": "^5.9.2",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.70.0",
-    "vitest": "^3.2.4"
+    "vitest": "^5.0.3"
   },
   "dependencies": {
     "@types/pg": "^8.23.1",
     "bullmq": "^6.3.4",
     "ioredis": "^6.0.0",
-    "nanoid": "^5.1.5",
+    "nanoid": "^6.0.1",
     "pg": "^8.23.0"
   }
 }
